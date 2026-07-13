@@ -131,6 +131,7 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;co
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/@tmcw/togeojson@5.8.1/dist/togeojson.umd.js"></script>
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
 var AC = {
@@ -195,8 +196,8 @@ var LG = [
     {id:"se_lr_mt",n:"Materiales",    t:"poly",f:"data/se/se_lr_materiales.geojson",  c:"#ca6f1e",fc:"#f8c471",fo:.5,w:.8,on:false,area:"lr"},
     {id:"se_lr_ex",n:"Experiencias",  t:"poly",f:"data/se/se_lr_experiencias.geojson",c:"#d35400",fc:"#f0b27a",fo:.5,w:.8,on:false,area:"lr"}
   ]},
-  {g:"🌱 SE · Mecaya",open:false,area:"me",layers:[
-    {id:"se_me_c",n:"Consolidado ME",t:"poly",f:"data/se/se_me_consolidado.geojson",c:"#7d6608",fc:"#f9e79f",fo:.5,w:.8,on:false,area:"me"}
+  {g:"🌱 SE · Mecaya",open:false,area:"me",note:"La GDB solo contiene SE Consolidado para Mecaya. Coloreado automático por tipo: 🔵 Soporte · 🟢 Provisión · 🟣 Cultural",layers:[
+    {id:"se_me_c",n:"Consolidado ME (85 polígonos)",t:"poly",f:"data/se/se_me_consolidado.geojson",c:"#7d6608",fc:"#f9e79f",fo:.5,w:.8,on:false,area:"me"}
   ]},
   {g:"📌 Puntos de Muestreo",open:true,layers:[
     {id:"puntos",n:"Puntos de muestreo",t:"ptm",f:"data/puntos/puntos_muestreo.geojson",pc:"#2471a3",on:true}
@@ -373,6 +374,12 @@ function buildLP(){
     var gi=document.createElement("div");
     gi.style.display=grp.open?"":"none";
     gt.onclick=function(){var op=gi.style.display!=="none";gi.style.display=op?"":"block";gt.querySelector("span:last-child").textContent=op?"▼":"▲";};
+    if(grp.note){
+      var nd=document.createElement("div");
+      nd.style.cssText="font-size:10px;color:#7f8c8d;padding:5px 8px 4px 8px;border-left:3px solid #b7770d;margin:4px 4px 2px 4px;background:#fef9e7;border-radius:0 4px 4px 0;line-height:1.4;";
+      nd.textContent=grp.note;
+      gi.appendChild(nd);
+    }
     grp.layers.forEach(function(cfg){
       var item=document.createElement("div");item.className="lpit";
       var cb=document.createElement("input");cb.type="checkbox";cb.checked=cfg.on;
@@ -572,35 +579,149 @@ function dlButtons(code){
     "</div></div>";
 }
 
-// Convert GeoJSON feature to KML geometry string
+// ── KMZ GENERATION WITH COLORS ─────────────────────────────
 function geomToKML(g){
   if(!g)return"";
   function coords2D(cs){return cs.map(function(c){return c[0]+","+c[1]+(c[2]?","+c[2]:"");}).join(" ");}
   if(g.type==="Point")return"<Point><coordinates>"+g.coordinates[0]+","+g.coordinates[1]+"</coordinates></Point>";
-  if(g.type==="LineString")return"<LineString><coordinates>"+coords2D(g.coordinates)+"</coordinates></LineString>";
-  if(g.type==="MultiLineString"){return"<MultiGeometry>"+g.coordinates.map(function(l){return"<LineString><coordinates>"+coords2D(l)+"</coordinates></LineString>";}).join("")+"</MultiGeometry>";}
+  if(g.type==="LineString")return"<LineString><tessellate>1</tessellate><coordinates>"+coords2D(g.coordinates)+"</coordinates></LineString>";
+  if(g.type==="MultiLineString"){return"<MultiGeometry>"+g.coordinates.map(function(l){return"<LineString><tessellate>1</tessellate><coordinates>"+coords2D(l)+"</coordinates></LineString>";}).join("")+"</MultiGeometry>";}
   if(g.type==="Polygon"){return"<Polygon><outerBoundaryIs><LinearRing><coordinates>"+coords2D(g.coordinates[0])+"</coordinates></LinearRing></outerBoundaryIs>"+(g.coordinates.slice(1).map(function(r){return"<innerBoundaryIs><LinearRing><coordinates>"+coords2D(r)+"</coordinates></LinearRing></innerBoundaryIs>";}).join(""))+"</Polygon>";}
-  if(g.type==="MultiPolygon"){return"<MultiGeometry>"+g.coordinates.map(function(p){return"<Polygon><outerBoundaryIs><LinearRing><coordinates>"+coords2D(p[0])+"</coordinates></LinearRing></outerBoundaryIs></Polygon>";}).join("")+"</MultiGeometry>";}
+  if(g.type==="MultiPolygon"){return"<MultiGeometry>"+g.coordinates.map(function(p){return"<Polygon><outerBoundaryIs><LinearRing><coordinates>"+coords2D(p[0])+"</coordinates></LinearRing></outerBoundaryIs>"+(p.slice(1).map(function(r){return"<innerBoundaryIs><LinearRing><coordinates>"+coords2D(r[0])+"</coordinates></LinearRing></innerBoundaryIs>";}).join(""))+"</Polygon>";}).join("")+"</MultiGeometry>";}
   return"";
 }
 
-function geoJSONtoKML(name,data){
-  if(!data||!data.features)return"";
-  var pm=data.features.map(function(f,i){
+// KML colors: ABGR format (alpha-blue-green-red)
+function kmlStyles(){
+  return [
+    // SE types (polygon)
+    '<Style id="seS"><LineStyle><color>ffc1862e</color><width>1.5</width></LineStyle><PolyStyle><color>a0f1d6ae</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="seP"><LineStyle><color>ff49841e</color><width>1.5</width></LineStyle><PolyStyle><color>a0bfdfa9</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="seC"><LineStyle><color>ffad448e</color><width>1.5</width></LineStyle><PolyStyle><color>a0e2bdd7</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="seD"><LineStyle><color>ff0d77b7</color><width>1</width></LineStyle><PolyStyle><color>80f9e79f</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    // Study areas
+    '<Style id="areaCA"><LineStyle><color>ff8d611f</color><width>2.5</width></LineStyle><PolyStyle><color>208d611f</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="areaCB"><LineStyle><color>ff55660e</color><width>2.5</width></LineStyle><PolyStyle><color>2055660e</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="areaLR"><LineStyle><color>ff83346c</color><width>2.5</width></LineStyle><PolyStyle><color>2083346c</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="areaME"><LineStyle><color>ff0d77b7</color><width>2.5</width></LineStyle><PolyStyle><color>200d77b7</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    // Mining
+    '<Style id="min"><LineStyle><color>ff1c247b</color><width>1.5</width></LineStyle><PolyStyle><color>808a94f1</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="minL"><LineStyle><color>ff1c247b</color><width>2</width></LineStyle><PolyStyle><color>00000000</color><fill>0</fill><outline>1</outline></PolyStyle></Style>',
+    // Cartography base
+    '<Style id="cbcD"><LineStyle><color>ff765219</color><width>1.5</width></LineStyle><PolyStyle><color>00000000</color><fill>0</fill><outline>1</outline></PolyStyle></Style>',
+    '<Style id="cbc"><LineStyle><color>ff6b6a61</color><width>1</width></LineStyle><PolyStyle><color>00000000</color><fill>0</fill><outline>1</outline></PolyStyle></Style>',
+    // Protected areas
+    '<Style id="anp"><LineStyle><color>ff22bb22</color><width>1.5</width></LineStyle><PolyStyle><color>3322bb22</color><fill>1</fill><outline>1</outline></PolyStyle></Style>',
+    // Sampling points
+    '<Style id="pt"><IconStyle><color>ffa37124</color><scale>1.0</scale><Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LabelStyle><scale>0.7</scale></LabelStyle></Style>',
+  ].join("\n");
+}
+
+function getKMLStyleUrl(layerId, feat){
+  var p=(feat&&feat.properties)||{};
+  if(layerId&&layerId.startsWith("se_")){
+    var tipo=(p["Tipo_de_se"]||p["Tipo de SE"]||"").toLowerCase();
+    if(tipo.match(/soporte/))return"#seS";
+    if(tipo.match(/provis/))return"#seP";
+    if(tipo.match(/cultur/))return"#seC";
+    return"#seD";
+  }
+  if(layerId==="area_ca")return"#areaCA";
+  if(layerId==="area_cb")return"#areaCB";
+  if(layerId==="area_lr")return"#areaLR";
+  if(layerId==="area_me")return"#areaME";
+  if(layerId&&(layerId.startsWith("min_")||layerId==="min_po"))return"#min";
+  if(layerId==="min_li")return"#minL";
+  if(layerId==="cbc_dr")return"#cbcD";
+  if(layerId&&layerId.startsWith("cbc_"))return"#cbc";
+  if(layerId&&layerId.startsWith("anp_"))return"#anp";
+  if(layerId==="puntos")return"#pt";
+  return"#seD";
+}
+
+function featToKMLPlacemark(feat, layerId, idx){
+  var p=feat.properties||{};
+  var nm=p["Nombre_Sie"]||p["Nombre"]||p["nombre"]||p["Name"]||p["name"]||p["NOMBRE"]||("Elemento "+(idx+1));
+  // HTML table description
+  var keys=Object.keys(p).filter(function(k){return p[k]!==null&&p[k]!==undefined&&p[k]!=="";});
+  var tbl='<table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:11px;min-width:200px">';
+  keys.forEach(function(k){
+    tbl+='<tr><td style="font-weight:bold;padding:3px 6px;background:#f5f5f5;border:1px solid #ddd;white-space:nowrap">'+k+'</td>'+
+         '<td style="padding:3px 6px;border:1px solid #ddd">'+p[k]+'</td></tr>';
+  });
+  tbl+="</table>";
+  return"<Placemark>"+
+    "<name><![CDATA["+nm+"]]></name>"+
+    "<description><![CDATA["+tbl+"]]></description>"+
+    "<styleUrl>"+getKMLStyleUrl(layerId,feat)+"</styleUrl>"+
+    geomToKML(feat.geometry)+
+    "</Placemark>";
+}
+
+function buildSEKMLFolders(layerId, data){
+  // Split SE into type sub-folders
+  var byType={seS:[],seP:[],seC:[],seD:[]};
+  (data.features||[]).forEach(function(f,i){
     var p=f.properties||{};
-    var nm=p.Nombre||p.nombre||p.Name||p.name||(name+" "+(i+1));
-    var desc=Object.keys(p).filter(function(k){return p[k]!==null&&p[k]!=="";}).map(function(k){return k+": "+p[k];}).join("\n");
-    return"<Placemark><name><![CDATA["+nm+"]]></name><description><![CDATA["+desc+"]]></description>"+geomToKML(f.geometry)+"</Placemark>";
-  }).join("");
-  return"<Folder><name>"+name+"</name>"+pm+"</Folder>";
+    var tipo=(p["Tipo_de_se"]||p["Tipo de SE"]||"").toLowerCase();
+    var key=tipo.match(/soporte/)?"seS":tipo.match(/provis/)?"seP":tipo.match(/cultur/)?"seC":"seD";
+    byType[key].push(featToKMLPlacemark(f,layerId,i));
+  });
+  var names={seS:"🔵 Soporte",seP:"🟢 Provisión",seC:"🟣 Cultural",seD:"⚪ Sin clasificar"};
+  var out="";
+  ["seS","seP","seC","seD"].forEach(function(k){
+    if(byType[k].length>0){
+      out+="<Folder><name>"+names[k]+" ("+byType[k].length+" polígonos)</name>"+byType[k].join("")+"</Folder>";
+    }
+  });
+  return out;
 }
 
 function dlKMZ(code){
   if(!window.JSZip){alert("JSZip no disponible");return;}
-  showLd("Generando KMZ...");
+  showLd("Generando KMZ con colores…");
   var layers=collectLayers(code);
-  var kmlFolders=layers.map(function(x){return geoJSONtoKML(x.name,x.data);}).join("");
-  var kml='<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Proyecto Mercurio 2026 - '+(code==="general"?"Todas las Áreas":AC[code].name)+'</name>'+kmlFolders+"</Document></kml>";
+  var areaName=code==="general"?"Todas las Áreas":AC[code].name;
+  var date=new Date().toLocaleDateString("es-CO");
+
+  // Classify layers by category
+  var areaL=[],seL=[],minL=[],cbcL=[],anpL=[],ptL=[];
+  layers.forEach(function(x){
+    var id=x.id;
+    if(id.startsWith("area_"))areaL.push(x);
+    else if(id.startsWith("se_"))seL.push(x);
+    else if(id.startsWith("min_"))minL.push(x);
+    else if(id.startsWith("cbc_")||id.startsWith("cb_"))cbcL.push(x);
+    else if(id.startsWith("anp_"))anpL.push(x);
+    else if(id==="puntos")ptL.push(x);
+  });
+
+  function simpleKMLFolder(folderName, layerList){
+    if(!layerList.length)return"";
+    var pms="";
+    layerList.forEach(function(x){(x.data.features||[]).forEach(function(f,i){pms+=featToKMLPlacemark(f,x.id,i);});});
+    return pms?"<Folder><name>"+folderName+"</name>"+pms+"</Folder>":"";
+  }
+
+  var doc="";
+  doc+=simpleKMLFolder("📐 Área de Estudio",areaL);
+  if(seL.length){
+    var seContent="";
+    seL.forEach(function(x){seContent+=buildSEKMLFolders(x.id,x.data);});
+    doc+="<Folder><name>🌱 Servicios Ecosistémicos</name>"+seContent+"</Folder>";
+  }
+  doc+=simpleKMLFolder("💧 Cartografía Base · Putumayo",cbcL);
+  doc+=simpleKMLFolder("⛏️ Minería Ilegal",minL);
+  doc+=simpleKMLFolder("🛡️ Áreas Protegidas",anpL);
+  doc+=simpleKMLFolder("📌 Puntos de Muestreo",ptL);
+
+  var kml='<?xml version="1.0" encoding="UTF-8"?>\n'+
+    '<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n'+
+    '<name><![CDATA[Proyecto Mercurio 2026 · '+areaName+']]></name>\n'+
+    '<description><![CDATA[<b>Proyecto Mercurio 2026</b><br>Corpoamazonia · Putumayo, Colombia<br>'+
+    'Área: '+areaName+'<br>Fecha de exportación: '+date+'<br>CRS: WGS84 (EPSG:4326)]]></description>\n'+
+    kmlStyles()+"\n"+doc+"\n</Document>\n</kml>";
+
   var zip=new JSZip();
   zip.file("doc.kml",kml);
   zip.generateAsync({type:"blob"}).then(function(blob){
@@ -652,6 +773,105 @@ function collectLayers(code){
   return result;
 }
 
+// ── USER KML LOADER ────────────────────────────────────────
+var S_userLayers=[];
+
+function initKMLLoader(){
+  var panel=el("lpc");if(!panel)return;
+  var div=document.createElement("div");
+  div.id="kml-loader-zone";
+  div.style.cssText="padding:10px 12px;border-top:2px solid #d5d8dc;margin-top:6px;background:#f8f9fa;";
+  div.innerHTML=
+    '<div style="font-size:11px;font-weight:700;color:#5d6d7e;margin-bottom:7px;letter-spacing:.5px">📂 CARGAR KML/KMZ PROPIO</div>'+
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 10px;border:1.5px dashed #85929e;border-radius:6px;font-size:11px;color:#34495e;background:#fff;transition:border-color .2s" '+
+    'onmouseover="this.style.borderColor=\'#2471a3\'" onmouseout="this.style.borderColor=\'#85929e\'">'+
+    '<input type="file" id="kml-file-input" accept=".kml,.kmz" style="display:none" onchange="loadUserKMLFile(this)">'+
+    '📎 Seleccionar archivo KML o KMZ</label>'+
+    '<div id="kml-layers-list" style="margin-top:6px;font-size:10px;"></div>';
+  panel.appendChild(div);
+}
+
+function loadUserKMLFile(input){
+  var file=input.files[0];if(!file)return;
+  var nm=file.name.replace(/\.(kml|kmz)$/i,"");
+  var isKMZ=file.name.toLowerCase().endsWith(".kmz");
+  if(isKMZ){
+    if(!window.JSZip){alert("JSZip no disponible");return;}
+    var r=new FileReader();
+    r.onload=function(e){
+      JSZip.loadAsync(e.target.result).then(function(zip){
+        var kf=zip.file("doc.kml");
+        if(!kf){var keys=Object.keys(zip.files);for(var i=0;i<keys.length;i++){if(keys[i].toLowerCase().endsWith(".kml")){kf=zip.file(keys[i]);break;}}}
+        if(!kf){alert("El KMZ no contiene un archivo KML.");return;}
+        kf.async("text").then(function(txt){addKMLToMap(txt,nm);});
+      }).catch(function(e2){alert("Error leyendo KMZ: "+e2.message);});
+    };
+    r.readAsArrayBuffer(file);
+  } else {
+    var r2=new FileReader();
+    r2.onload=function(e){addKMLToMap(e.target.result,nm);};
+    r2.readAsText(file,"UTF-8");
+  }
+  input.value="";
+}
+
+function addKMLToMap(kmlText,name){
+  if(!window.toGeoJSON){alert("Parser KML no cargado (verifique conexión a internet).");return;}
+  var parser=new DOMParser();
+  var doc=parser.parseFromString(kmlText,"text/xml");
+  var geojson;
+  try{geojson=toGeoJSON.kml(doc);}catch(e){alert("Error parseando KML: "+e.message);return;}
+  if(!geojson||!geojson.features||geojson.features.length===0){alert("El archivo KML no contiene geometrías reconocibles.");return;}
+
+  var palette=["#e74c3c","#e67e22","#9b59b6","#16a085","#2980b9","#d35400","#8e44ad","#c0392b"];
+  var col=palette[S_userLayers.length%palette.length];
+
+  var layer=L.geoJSON(geojson,{
+    style:function(f){
+      var p=f&&f.properties||{};
+      var stroke=p.stroke||col;
+      var fill=p.fill||col;
+      var fillOp=p["fill-opacity"]!=null?parseFloat(p["fill-opacity"]):0.35;
+      return{color:stroke,fillColor:fill,fillOpacity:fillOp,weight:2};
+    },
+    pointToLayer:function(f,ll){
+      return L.circleMarker(ll,{radius:7,color:col,fillColor:col,fillOpacity:.85,weight:2});
+    },
+    onEachFeature:function(f,l){
+      var p=f.properties||{};
+      var nm2=p.name||p.Name||name;
+      var desc=p.description||"";
+      var html="<b>"+nm2+"</b>";
+      if(desc)html+='<br><div style="font-size:10px;margin-top:4px">'+desc+"</div>";
+      l.bindPopup(html,{maxWidth:280});
+    }
+  });
+  layer.addTo(S.mainMap);
+  try{var b=layer.getBounds();if(b.isValid())S.mainMap.fitBounds(b,{padding:[20,20]});}catch(ignore){}
+
+  S_userLayers.push({layer:layer,name:name,color:col,count:geojson.features.length});
+  renderKMLLayerList();
+}
+
+function renderKMLLayerList(){
+  var el2=el("kml-layers-list");if(!el2)return;
+  if(!S_userLayers.length){el2.innerHTML="";return;}
+  var html='<div style="color:#5d6d7e;font-weight:600;margin-bottom:3px">Capas activas:</div>';
+  S_userLayers.forEach(function(e,i){
+    html+='<div style="display:flex;align-items:center;gap:5px;margin:3px 0;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid #e8e8e8">'+
+      '<span style="width:10px;height:10px;border-radius:50%;background:'+e.color+';flex-shrink:0;display:inline-block;border:1px solid rgba(0,0,0,.15)"></span>'+
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#2c3e50" title="'+e.name+'">'+e.name+'</span>'+
+      '<span style="color:#95a5a6;margin-right:2px">('+e.count+')</span>'+
+      '<button onclick="removeUserKMLLayer('+i+')" style="border:none;background:none;cursor:pointer;color:#e74c3c;font-size:13px;padding:0 2px;line-height:1;font-weight:bold" title="Eliminar capa">×</button>'+
+      '</div>';
+  });
+  el2.innerHTML=html;
+}
+
+function removeUserKMLLayer(idx){
+  if(S_userLayers[idx]){S.mainMap.removeLayer(S_userLayers[idx].layer);S_userLayers.splice(idx,1);renderKMLLayerList();}
+}
+
 // ── MAP INIT ───────────────────────────────────────────────
 function initMap(){
   S.mainMap=L.map("map",{center:[0.5,-75.8],zoom:9,zoomControl:true});
@@ -668,7 +888,7 @@ function closeModal(){el("modal").style.display="none";}
 
 // ── INIT ───────────────────────────────────────────────────
 window.addEventListener("load",function(){
-  initMap();initLocMap();buildLP();
+  initMap();initLocMap();buildLP();initKMLLoader();
   loadEssentials().then(function(){renderGeneralDash();updateLocMap("general");});
 });
 </script>
