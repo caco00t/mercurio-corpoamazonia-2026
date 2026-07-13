@@ -82,6 +82,55 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;co
 .leaflet-popup-content td{padding:2px 4px;vertical-align:top}
 .leaflet-popup-content td:first-child{font-weight:600;color:#555;white-space:nowrap;padding-right:8px}
 #sb{position:absolute;bottom:0;left:232px;right:296px;background:rgba(255,255,255,.8);font-size:10px;color:#777;padding:2px 8px;z-index:400;text-align:right;pointer-events:none}
+/* FABs ocultos en desktop, el media query los activa en mobile */
+#mob-fabs{display:none}
+#mob-backdrop{display:none}
+
+/* ── TABLET (769-1100px) ─────────────────────────────────── */
+@media (min-width:769px) and (max-width:1100px){
+  #lp{width:185px}
+  #dash{width:230px}
+  #sb{left:185px;right:230px}
+  .abtn{padding:5px 9px;font-size:10px}
+  #locmap{width:110px;height:86px}
+}
+
+/* ── MOBILE (≤768px) ─────────────────────────────────────── */
+@media (max-width:768px){
+  /* Header: título + nav scrollable en 2 filas */
+  #header{flex-wrap:wrap;height:auto;padding:8px 10px;gap:6px}
+  .title-block .main{font-size:12px}
+  .title-block .sub2{font-size:9px}
+  #area-nav{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;margin-left:0;gap:4px;padding-bottom:2px;scrollbar-width:none}
+  #area-nav::-webkit-scrollbar{display:none}
+  .abtn{padding:5px 9px;font-size:10px;white-space:nowrap;flex-shrink:0}
+  /* Main ocupa el resto de la pantalla */
+  #main{height:calc(100vh - 72px);position:relative}
+  /* Mapa toma todo el ancho */
+  #mw{width:100%}
+  /* Layer panel como drawer izquierdo */
+  #lp{position:absolute;left:0;top:0;bottom:0;z-index:601;width:270px;transform:translateX(-100%);transition:transform .25s ease;box-shadow:4px 0 16px rgba(0,0,0,.3)}
+  #lp.mob-open{transform:translateX(0)}
+  /* Dashboard como drawer derecho */
+  #dash{position:absolute;right:0;top:0;bottom:0;z-index:601;width:280px;transform:translateX(100%);transition:transform .25s ease;box-shadow:-4px 0 16px rgba(0,0,0,.3)}
+  #dash.mob-open{transform:translateX(0)}
+  /* Backdrop oscuro detrás de drawers */
+  #mob-backdrop{display:none;position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:600;cursor:pointer}
+  #mob-backdrop.vis{display:block}
+  /* FABs de toggle flotantes */
+  #mob-fabs{position:absolute;bottom:44px;left:0;right:0;display:flex;justify-content:space-between;padding:0 14px;z-index:500;pointer-events:none}
+  .mob-fab{pointer-events:all;width:46px;height:46px;border-radius:23px;background:var(--dk);color:#fff;border:2px solid rgba(255,255,255,.25);font-size:19px;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;transition:background .15s}
+  .mob-fab:active{background:var(--lt)}
+  .mob-fab.active{background:var(--lt);border-color:#fff}
+  /* Mini-mapa oculto en mobile */
+  #locmap{display:none}
+  /* Status bar ancho completo */
+  #sb{left:0;right:0;font-size:9px}
+  /* Modal más compacto */
+  #modal-box{padding:24px;max-width:95%}
+  #modal-box h1{font-size:18px}
+  #modal-box ul li{font-size:12px}
+}
 </style>
 </head>
 <body>
@@ -121,6 +170,11 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;co
 <div id="locmap"></div>
 <div id="ldo"><div id="ldbw"><div id="ldb"></div></div><div id="ldt">Cargando...</div></div>
 <div id="sb">EPSG:4326 · Proyecto Mercurio 2026</div>
+<div id="mob-backdrop" onclick="closeMobPanels()"></div>
+<div id="mob-fabs">
+  <button class="mob-fab" id="fab-lp" onclick="toggleMobPanel('lp')" title="Capas">🗂️</button>
+  <button class="mob-fab" id="fab-dash" onclick="toggleMobPanel('dash')" title="Dashboard">📊</button>
+</div>
 </div>
 <div id="dash">
 <div id="dh"><div id="ddot"></div><div id="dan">Selecciona un área</div></div>
@@ -772,6 +826,34 @@ function collectLayers(code){
   }
   return result;
 }
+
+// ── MOBILE PANEL TOGGLE ────────────────────────────────────
+function isMobile(){return window.innerWidth<=768;}
+function toggleMobPanel(id){
+  if(!isMobile())return;
+  var panel=el(id);
+  var bd=el("mob-backdrop");
+  var fabId=id==="lp"?"fab-lp":"fab-dash";
+  var fab=el(fabId);
+  var isOpen=panel.classList.contains("mob-open");
+  closeMobPanels();
+  if(!isOpen){
+    panel.classList.add("mob-open");
+    bd.classList.add("vis");
+    if(fab)fab.classList.add("active");
+  }
+}
+function closeMobPanels(){
+  ["lp","dash"].forEach(function(id){el(id).classList.remove("mob-open");});
+  var bd=el("mob-backdrop");if(bd)bd.classList.remove("vis");
+  ["fab-lp","fab-dash"].forEach(function(id){var f=el(id);if(f)f.classList.remove("active");});
+}
+// Close drawers when a layer checkbox is tapped (UX: tap → auto-close)
+document.addEventListener("change",function(e){
+  if(isMobile()&&e.target&&e.target.getAttribute&&e.target.getAttribute("data-lid")){
+    setTimeout(function(){closeMobPanels();},300);
+  }
+});
 
 // ── USER KML LOADER ────────────────────────────────────────
 var S_userLayers=[];
