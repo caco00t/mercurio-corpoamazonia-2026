@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Proyecto Mercurio · Corpoamazonia 2026</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
+<style>
+:root{--dk:#0d3b20;--md:#1a6b3a;--lt:#2d9e5a;--acc:#e8a020;--bg:#f0f5f0;--pn:#ffffff;--tx:#1a2e1a;--mu:#5a7060;--bd:#c5d9c5;--ca:#1f618d;--cb:#0e6655;--lr:#6c3483;--me:#b7770d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;color:var(--tx);background:var(--bg)}
+#modal{position:fixed;z-index:9999;inset:0;background:rgba(0,20,10,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center}
+#modal-box{background:var(--pn);border-radius:12px;padding:40px;max-width:560px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.4);border-top:5px solid var(--lt)}
+#modal-box h1{font-size:22px;color:var(--dk);margin-bottom:4px}
+#modal-box .sub{color:var(--mu);font-size:13px;margin-bottom:24px;border-bottom:1px solid var(--bd);padding-bottom:16px}
+#modal-box h2{font-size:12px;font-weight:700;margin-bottom:10px;color:var(--md);text-transform:uppercase;letter-spacing:.5px}
+#modal-box ul{list-style:none;margin-bottom:28px}
+#modal-box ul li{padding:7px 0 7px 22px;font-size:13px;border-bottom:1px solid var(--bd);position:relative}
+#modal-box ul li::before{content:"→";position:absolute;left:0;color:var(--lt);font-weight:700}
+#modal-box ul li:last-child{border-bottom:none}
+.btn-enter{width:100%;padding:14px;background:var(--md);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-enter:hover{background:var(--dk)}
+#header{height:54px;background:var(--dk);color:#fff;display:flex;align-items:center;padding:0 14px;gap:16px;flex-shrink:0;border-bottom:3px solid var(--acc)}
+.title-block .main{font-size:14px;font-weight:700}
+.title-block .sub2{font-size:10px;color:#a8cca8;margin-top:1px}
+#area-nav{display:flex;gap:5px;align-items:center;margin-left:auto;flex-shrink:0}
+.abtn{padding:6px 12px;border-radius:6px;border:2px solid transparent;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;background:rgba(255,255,255,.1);color:#fff}
+.abtn:hover{background:rgba(255,255,255,.2)}
+.abtn.active{border-color:#fff!important;background:rgba(255,255,255,.22)!important}
+.abtn.gen{border-color:var(--acc);color:var(--acc)}
+.abtn.ca{background:var(--ca)}.abtn.cb{background:var(--cb)}.abtn.lr{background:var(--lr)}.abtn.me{background:var(--me)}
+#main{display:flex;height:calc(100vh - 54px);overflow:hidden}
+#lp{width:232px;flex-shrink:0;background:var(--pn);border-right:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column}
+#lp::-webkit-scrollbar{width:4px}
+#lp::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.lph{padding:10px 12px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mu);border-bottom:1px solid var(--bd);background:var(--bg);position:sticky;top:0;z-index:1}
+.lpgt{padding:7px 10px;font-size:10px;font-weight:700;color:var(--md);text-transform:uppercase;letter-spacing:.4px;background:#f4faf4;border-bottom:1px solid var(--bd);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.lpgt:hover{background:#edf6ed}
+.lpit{display:flex;align-items:center;gap:7px;padding:4px 10px;font-size:11px;cursor:pointer;transition:background .1s}
+.lpit:hover{background:#f0f8f0}
+.lpit input{cursor:pointer;accent-color:var(--md);width:12px;height:12px;flex-shrink:0}
+.sw{width:12px;height:12px;border-radius:2px;flex-shrink:0;border:1px solid rgba(0,0,0,.2)}
+.lpit .ln{flex:1;color:var(--tx)}
+#mw{flex:1;position:relative}
+#map{height:100%}
+#locmap{position:absolute;bottom:28px;left:10px;z-index:400;width:140px;height:110px;background:#daeada;border:2px solid #fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);overflow:hidden}
+#ldo{position:absolute;inset:0;background:rgba(10,30,15,.5);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px}
+#ldo.vis{display:flex}
+#ldbw{width:200px;background:rgba(255,255,255,.2);border-radius:3px;height:5px}
+#ldb{width:0%;height:100%;background:var(--acc);border-radius:3px;transition:width .3s}
+#ldt{color:#fff;font-size:13px;font-weight:500}
+#dash{width:296px;flex-shrink:0;background:var(--bg);border-left:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column}
+#dash::-webkit-scrollbar{width:4px}
+#dash::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+#dh{padding:12px 14px;background:var(--dk);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;flex-shrink:0}
+#ddot{width:11px;height:11px;border-radius:50%;background:#fff;flex-shrink:0}
+#dc{padding:10px;display:flex;flex-direction:column;gap:9px}
+.sc{background:var(--pn);border-radius:8px;padding:11px;border:1px solid var(--bd);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.sct{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.sbig{font-size:26px;font-weight:700;color:var(--dk);line-height:1}
+.su{font-size:11px;color:var(--mu);margin-left:2px}
+.ss{font-size:11px;color:var(--mu);margin-top:3px}
+.sbb-r{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px}
+.sbb-l{width:68px;font-weight:500;color:var(--tx)}
+.sbb-o{flex:1;height:7px;background:var(--bg);border-radius:3px;overflow:hidden}
+.sbb-i{height:100%;border-radius:3px}
+.sbb-v{width:48px;text-align:right;color:var(--mu);font-size:10px}
+.plist{display:flex;flex-direction:column;gap:3px;margin-top:4px}
+.pit{background:var(--bg);padding:4px 7px;border-radius:4px;font-size:11px;display:flex;align-items:center;gap:5px}
+.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.mt{width:100%;border-collapse:collapse;margin-top:4px}
+.mt td{font-size:11px;padding:3px 3px}
+.mt td:first-child{color:var(--mu)}
+.mt td:last-child{font-weight:600;text-align:right;color:var(--dk)}
+.mt tr:nth-child(even) td{background:var(--bg)}
+#de{padding:36px 16px;text-align:center;color:var(--mu);font-size:12px;line-height:1.6}
+#de .arr{font-size:28px;margin-bottom:10px}
+.leaflet-popup-content{font-size:12px;max-width:260px}
+.leaflet-popup-content table{border-collapse:collapse;width:100%}
+.leaflet-popup-content td{padding:2px 4px;vertical-align:top}
+.leaflet-popup-content td:first-child{font-weight:600;color:#555;white-space:nowrap;padding-right:8px}
+#sb{position:absolute;bottom:0;left:232px;right:296px;background:rgba(255,255,255,.8);font-size:10px;color:#777;padding:2px 8px;z-index:400;text-align:right;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="modal">
+<div id="modal-box">
+<h1>🌿 Proyecto Mercurio · Corpoamazonia 2026</h1>
+<p class="sub">Caracterización de Rondas Hídricas · Departamento del Putumayo</p>
+<h2>Instrucciones de uso</h2>
+<ul>
+<li>Selecciona un <strong>Área de Estudio</strong> en la barra superior para centrar el mapa y ver sus indicadores</li>
+<li>El panel <strong>izquierdo</strong> activa y desactiva capas por grupo temático</li>
+<li>El panel <strong>derecho</strong> muestra el dashboard con indicadores del área seleccionada</li>
+<li>Haz <strong>clic</strong> en cualquier objeto del mapa para ver sus atributos</li>
+<li>El <strong>mini-mapa</strong> (esquina inferior izquierda) muestra la ubicación en Colombia</li>
+<li>Los indicadores se calculan automáticamente de los datos cargados</li>
+</ul>
+<button class="btn-enter" onclick="closeModal()">Entrar al visor →</button>
+</div>
+</div>
+<div id="header">
+<div class="title-block">
+<div class="main">🌿 Proyecto Mercurio · Corpoamazonia 2026</div>
+<div class="sub2">Rondas Hídricas · Putumayo, Colombia</div>
+</div>
+<div id="area-nav">
+<button class="abtn gen" id="btn-general" onclick="selectArea('general')">Vista General</button>
+<button class="abtn ca" id="btn-ca" onclick="selectArea('ca')">Curillo Alto</button>
+<button class="abtn cb" id="btn-cb" onclick="selectArea('cb')">Curillo Bajo</button>
+<button class="abtn lr" id="btn-lr" onclick="selectArea('lr')">La Rastra</button>
+<button class="abtn me" id="btn-me" onclick="selectArea('me')">Mecaya</button>
+</div>
+</div>
+<div id="main">
+<div id="lp"><div class="lph">Capas</div><div id="lpc"></div></div>
+<div id="mw">
+<div id="map"></div>
+<div id="locmap"></div>
+<div id="ldo"><div id="ldbw"><div id="ldb"></div></div><div id="ldt">Cargando...</div></div>
+<div id="sb">EPSG:4326 · Proyecto Mercurio 2026</div>
+</div>
+<div id="dash">
+<div id="dh"><div id="ddot"></div><div id="dan">Selecciona un área</div></div>
+<div id="dc"><div id="de"><div class="arr">☝️</div>Selecciona un área de estudio en la barra superior para ver indicadores del área</div></div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+var AC = {
+  general:{name:"Vista General",color:"#1a6b3a"},
+  ca:{name:"Curillo Alto",color:"#1f618d",file:"data/areas/curillo_alto.geojson"},
+  cb:{name:"Curillo Bajo",color:"#0e6655",file:"data/areas/curillo_bajo.geojson"},
+  lr:{name:"La Rastra",   color:"#6c3483",file:"data/areas/la_rastra.geojson"},
+  me:{name:"Mecaya",      color:"#b7770d",file:"data/areas/mecaya.geojson"}
+};
+
+var LG = [
+  {g:"🗺️ Áreas de Estudio",open:true,layers:[
+    {id:"area_ca",n:"Curillo Alto", t:"poly",f:"data/areas/curillo_alto.geojson",c:"#1f618d",fc:"#5dade2",fo:.15,w:2.5,on:true},
+    {id:"area_cb",n:"Curillo Bajo", t:"poly",f:"data/areas/curillo_bajo.geojson",c:"#0e6655",fc:"#52be80",fo:.15,w:2.5,on:true},
+    {id:"area_lr",n:"La Rastra",    t:"poly",f:"data/areas/la_rastra.geojson",   c:"#6c3483",fc:"#bb8fce",fo:.15,w:2.5,on:true},
+    {id:"area_me",n:"Mecaya",       t:"poly",f:"data/areas/mecaya.geojson",       c:"#b7770d",fc:"#f0b27a",fo:.15,w:2.5,on:true}
+  ]},
+  {g:"💧 Hidrografía",open:true,layers:[
+    {id:"cb_dr1",n:"Drenaje sencillo", t:"line",f:"data/cartografia/cb_drenaje_sencillo.geojson",c:"#1a72bb",w:1.5,on:true},
+    {id:"cb_dr2",n:"Drenaje doble",    t:"poly",f:"data/cartografia/cb_drenaje_doble.geojson",   c:"#1a72bb",fc:"#7fb3e8",fo:.5,w:1,on:true},
+    {id:"cb_mv", n:"Madrevieja",       t:"poly",f:"data/cartografia/cb_madrevieja.geojson",       c:"#1554a0",fc:"#7fb3d6",fo:.55,w:1,on:true},
+    {id:"cb_lg", n:"Laguna",           t:"poly",f:"data/cartografia/cb_laguna.geojson",           c:"#1a72bb",fc:"#85c1e9",fo:.6,w:1,on:true},
+    {id:"cb_pt", n:"Pantano",          t:"poly",f:"data/cartografia/cb_pantano.geojson",          c:"#4a6741",fc:"#8ab882",fo:.5,w:1,on:false},
+    {id:"cb_ba", n:"Banco de arena",   t:"poly",f:"data/cartografia/cb_banco_arena.geojson",      c:"#a07830",fc:"#e8c97a",fo:.5,w:1,on:false},
+    {id:"cb_il", n:"Isla",             t:"poly",f:"data/cartografia/cb_isla.geojson",             c:"#2e7d32",fc:"#81c784",fo:.5,w:1,on:false}
+  ]},
+  {g:"🛣️ Vías e Infraestructura",open:true,layers:[
+    {id:"cb_vi",n:"Vías",             t:"line",f:"data/cartografia/cb_via.geojson",            c:"#8b4513",w:1.8,on:true},
+    {id:"cb_pu",n:"Puentes",          t:"ptc", f:"data/cartografia/cb_puente.geojson",         pc:"#8b4513",on:true},
+    {id:"cb_ce",n:"Cercas",           t:"line",f:"data/cartografia/cb_cerca.geojson",          c:"#996633",w:1,on:false},
+    {id:"cb_co",n:"Construcciones",   t:"ptc", f:"data/cartografia/cb_construccion.geojson",   pc:"#888888",on:false},
+    {id:"cb_ad",n:"Administrativo",   t:"ptc", f:"data/cartografia/cb_administrativo.geojson", pc:"#333333",on:false}
+  ]},
+  {g:"🌿 Vegetación",open:false,layers:[
+    {id:"cb_bo",n:"Bosque",          t:"poly",f:"data/cartografia/cb_bosque.geojson",       c:"#1a5c2e",fc:"#52be80",fo:.35,w:.8,on:true},
+    {id:"cb_cn",n:"Curvas de nivel", t:"line",f:"data/cartografia/cb_curva_nivel.geojson",  c:"#a08040",w:.5,on:false}
+  ]},
+  {g:"🏞️ Contexto Putumayo",open:false,layers:[
+    {id:"cbc_dr",n:"Drenaje (región)",  t:"line",f:"data/contexto/cbc_drenaje.geojson", c:"#5dade2",w:.7,on:false},
+    {id:"cbc_vi",n:"Vías (región)",     t:"line",f:"data/contexto/cbc_via.geojson",     c:"#cc8844",w:.7,on:false},
+    {id:"cbc_bo",n:"Bosque (región)",   t:"poly",f:"data/contexto/cbc_bosque.geojson",  c:"#1a5c2e",fc:"#52be80",fo:.2,w:.5,on:false},
+    {id:"cbc_ad",n:"Centros poblados",  t:"ptc", f:"data/contexto/cbc_admin.geojson",   pc:"#444",on:false}
+  ]},
+  {g:"🛡️ Áreas Protegidas",open:false,layers:[
+    {id:"anp_na",n:"Parques Nacionales",   t:"poly",f:"data/anp/anp_nacional.geojson",         c:"#145a32",fc:"#1e8449",fo:.3,w:1.5,on:false},
+    {id:"anp_de",n:"ANP Departamentales", t:"poly",f:"data/anp/anp_departamental.geojson",     c:"#196f3d",fc:"#27ae60",fo:.25,w:1,on:false},
+    {id:"anp_bp",n:"Bosques Protectores", t:"poly",f:"data/anp/anp_bosqueprotector.geojson",   c:"#1d8348",fc:"#2ecc71",fo:.2,w:1,on:false},
+    {id:"anp_rf",n:"Reservas Forestales", t:"poly",f:"data/anp/anp_reservaflorestal.geojson",  c:"#4d7c0f",fc:"#84cc16",fo:.2,w:1,on:false},
+    {id:"biomas",n:"Biomas",              t:"poly",f:"data/anp/biomas.geojson",                c:"#5a8a3a",fc:"#90cc60",fo:.12,w:1,on:false}
+  ]},
+  {g:"⛏️ Minería",open:true,layers:[
+    {id:"min_po",n:"Minería ilegal (polígono)", t:"poly",f:"data/mineria/mineria_ilegal_poligono.geojson",c:"#7b241c",fc:"#e74c3c",fo:.45,w:.8,on:true},
+    {id:"min_li",n:"Minería ilegal (línea)",    t:"line",f:"data/mineria/mineria_ilegal_linea.geojson",  c:"#c0392b",w:2,on:true},
+    {id:"min_pt",n:"Minería ilegal (punto)",    t:"ptc", f:"data/mineria/mineria_ilegal_punto.geojson",  pc:"#e74c3c",on:true},
+    {id:"min_cu",n:"Minería Curillo",           t:"poly",f:"data/mineria/mineria_curillo.geojson",       c:"#922b21",fc:"#f1948a",fo:.55,w:1,on:false},
+    {id:"min_me",n:"Minería Mecaya",            t:"poly",f:"data/mineria/mineria_mecaya.geojson",        c:"#922b21",fc:"#f1948a",fo:.55,w:1,on:false}
+  ]},
+  {g:"🌱 SE · Curillo Alto",open:false,area:"ca",layers:[
+    {id:"se_ca_c",n:"Consolidado CA", t:"poly",f:"data/se/se_ca_consolidado.geojson", c:"#7d6608",fc:"#f9e79f",fo:.5,w:.8,on:false,area:"ca"},
+    {id:"se_ca_ag",n:"Agua",          t:"poly",f:"data/se/se_ca_agua.geojson",        c:"#1a72bb",fc:"#aed6f1",fo:.6,w:.8,on:false,area:"ca"},
+    {id:"se_ca_al",n:"Alimentos",     t:"poly",f:"data/se/se_ca_alimentos.geojson",   c:"#1e8449",fc:"#a9dfbf",fo:.5,w:.8,on:false,area:"ca"},
+    {id:"se_ca_md",n:"Medicinales",   t:"poly",f:"data/se/se_ca_medicinales.geojson", c:"#8e44ad",fc:"#d7bde2",fo:.5,w:.8,on:false,area:"ca"},
+    {id:"se_ca_hb",n:"Hábitats",      t:"poly",f:"data/se/se_ca_habitats.geojson",    c:"#117a65",fc:"#a2d9ce",fo:.5,w:.8,on:false,area:"ca"},
+    {id:"se_ca_mt",n:"Materiales",    t:"poly",f:"data/se/se_ca_materiales.geojson",  c:"#ca6f1e",fc:"#f8c471",fo:.5,w:.8,on:false,area:"ca"},
+    {id:"se_ca_ex",n:"Experiencias",  t:"poly",f:"data/se/se_ca_experiencias.geojson",c:"#d35400",fc:"#f0b27a",fo:.5,w:.8,on:false,area:"ca"}
+  ]},
+  {g:"🌱 SE · Curillo Bajo",open:false,area:"cb",layers:[
+    {id:"se_cb_c",n:"Consolidado CB", t:"poly",f:"data/se/se_cb_consolidado.geojson", c:"#7d6608",fc:"#f9e79f",fo:.5,w:.8,on:false,area:"cb"},
+    {id:"se_cb_ag",n:"Agua",          t:"poly",f:"data/se/se_cb_agua.geojson",        c:"#1a72bb",fc:"#aed6f1",fo:.6,w:.8,on:false,area:"cb"},
+    {id:"se_cb_al",n:"Alimentos",     t:"poly",f:"data/se/se_cb_alimentos.geojson",   c:"#1e8449",fc:"#a9dfbf",fo:.5,w:.8,on:false,area:"cb"},
+    {id:"se_cb_md",n:"Medicinales",   t:"poly",f:"data/se/se_cb_medicinales.geojson", c:"#8e44ad",fc:"#d7bde2",fo:.5,w:.8,on:false,area:"cb"},
+    {id:"se_cb_hb",n:"Hábitats",      t:"poly",f:"data/se/se_cb_habitats.geojson",    c:"#117a65",fc:"#a2d9ce",fo:.5,w:.8,on:false,area:"cb"},
+    {id:"se_cb_mt",n:"Materiales",    t:"poly",f:"data/se/se_cb_materiales.geojson",  c:"#ca6f1e",fc:"#f8c471",fo:.5,w:.8,on:false,area:"cb"},
+    {id:"se_cb_ex",n:"Experiencias",  t:"poly",f:"data/se/se_cb_experiencias.geojson",c:"#d35400",fc:"#f0b27a",fo:.5,w:.8,on:false,area:"cb"}
+  ]},
+  {g:"🌱 SE · La Rastra",open:false,area:"lr",layers:[
+    {id:"se_lr_c",n:"Consolidado LR", t:"poly",f:"data/se/se_lr_consolidado.geojson", c:"#7d6608",fc:"#f9e79f",fo:.5,w:.8,on:false,area:"lr"},
+    {id:"se_lr_ag",n:"Agua",          t:"poly",f:"data/se/se_lr_agua.geojson",        c:"#1a72bb",fc:"#aed6f1",fo:.6,w:.8,on:false,area:"lr"},
+    {id:"se_lr_al",n:"Alimentos",     t:"poly",f:"data/se/se_lr_alimentos.geojson",   c:"#1e8449",fc:"#a9dfbf",fo:.5,w:.8,on:false,area:"lr"},
+    {id:"se_lr_md",n:"Medicinales",   t:"poly",f:"data/se/se_lr_medicinales.geojson", c:"#8e44ad",fc:"#d7bde2",fo:.5,w:.8,on:false,area:"lr"},
+    {id:"se_lr_hb",n:"Hábitats",      t:"poly",f:"data/se/se_lr_habitats.geojson",    c:"#117a65",fc:"#a2d9ce",fo:.5,w:.8,on:false,area:"lr"},
+    {id:"se_lr_mt",n:"Materiales",    t:"poly",f:"data/se/se_lr_materiales.geojson",  c:"#ca6f1e",fc:"#f8c471",fo:.5,w:.8,on:false,area:"lr"},
+    {id:"se_lr_ex",n:"Experiencias",  t:"poly",f:"data/se/se_lr_experiencias.geojson",c:"#d35400",fc:"#f0b27a",fo:.5,w:.8,on:false,area:"lr"}
+  ]},
+  {g:"🌱 SE · Mecaya",open:false,area:"me",layers:[
+    {id:"se_me_c",n:"Consolidado ME",t:"poly",f:"data/se/se_me_consolidado.geojson",c:"#7d6608",fc:"#f9e79f",fo:.5,w:.8,on:false,area:"me"}
+  ]},
+  {g:"📌 Puntos de Muestreo",open:true,layers:[
+    {id:"puntos",n:"Puntos de muestreo",t:"ptm",f:"data/puntos/puntos_muestreo.geojson",pc:"#2471a3",on:true}
+  ]}
+];
+
+var COLOMBIA = {type:"Feature",properties:{},geometry:{type:"Polygon",coordinates:[[
+  [-72.4,12.4],[-71.9,12.1],[-71.0,12.4],[-70.1,11.9],[-72.4,10.8],
+  [-74.3,10.4],[-75.6,10.9],[-76.7,9.5],[-76.9,8.1],[-77.3,7.7],
+  [-77.5,7.2],[-77.0,5.9],[-77.5,4.3],[-77.7,3.1],[-78.9,1.5],
+  [-78.4,0.8],[-75.8,0.1],[-75.5,-0.4],[-75.3,-1.8],[-73.5,-1.2],
+  [-70.9,-2.2],[-70.1,-4.2],[-69.9,-4.1],[-70.5,-2.5],[-72.0,-2.0],
+  [-68.2,1.8],[-67.4,2.0],[-66.9,1.2],[-67.3,4.1],[-67.8,6.3],
+  [-67.5,8.0],[-68.6,9.8],[-69.0,10.0],[-70.3,11.2],[-72.0,12.2],
+  [-72.4,12.4]
+]]}};
+
+// ── STATE ──────────────────────────────────────────────────
+var S = {
+  area:null, data:{}, layers:{}, lmap:{}, bounds:{},
+  mainMap:null, locMap:null, locLG:null
+};
+LG.forEach(function(g){g.layers.forEach(function(l){S.lmap[l.id]=l;});});
+
+// ── UTILS ──────────────────────────────────────────────────
+function el(id){return document.getElementById(id);}
+function fmtHa(m2){var h=m2/10000;return h>=1000?(h/1000).toFixed(1)+" mil ha":h.toFixed(0)+" ha";}
+function fmtKm(m){return m>=1000?(m/1000).toFixed(1)+" km":Math.round(m)+" m";}
+
+function polyArea(ring){
+  var a=0,R=6378137,n=ring.length-1;
+  for(var i=0;i<n;i++){
+    var p1=ring[i],p2=ring[i+1];
+    a+=(p2[0]-p1[0])*Math.PI/180*(2+Math.sin(p1[1]*Math.PI/180)+Math.sin(p2[1]*Math.PI/180));
+  }
+  return Math.abs(a*R*R/2);
+}
+function lineLen(cs){
+  var t=0,R=6378137;
+  for(var i=0;i<cs.length-1;i++){
+    var dLa=(cs[i+1][1]-cs[i][1])*Math.PI/180,dLo=(cs[i+1][0]-cs[i][0])*Math.PI/180;
+    var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(cs[i][1]*Math.PI/180)*Math.cos(cs[i+1][1]*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
+    t+=2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  }
+  return t;
+}
+function featArea(f){
+  var p=f.properties||{};
+  var v=p["Área"]||p["Area"]||p["AREA"];
+  if(v&&!isNaN(v))return parseFloat(v);
+  var g=f.geometry;if(!g)return 0;
+  if(g.type==="Polygon")return polyArea(g.coordinates[0]);
+  if(g.type==="MultiPolygon"){var t=0;g.coordinates.forEach(function(r){t+=polyArea(r[0]);});return t;}
+  return 0;
+}
+function featLen(f){
+  var g=f.geometry;if(!g)return 0;
+  if(g.type==="LineString")return lineLen(g.coordinates);
+  if(g.type==="MultiLineString"){var t=0;g.coordinates.forEach(function(l){t+=lineLen(l);});return t;}
+  return 0;
+}
+function centroid(f){
+  var g=f.geometry;if(!g)return null;
+  if(g.type==="Point")return g.coordinates;
+  var ring=null;
+  if(g.type==="Polygon")ring=g.coordinates[0];
+  else if(g.type==="MultiPolygon")ring=g.coordinates[0][0];
+  if(!ring)return null;
+  var x=0,y=0;ring.forEach(function(c){x+=c[0];y+=c[1];});
+  return[x/ring.length,y/ring.length];
+}
+function pip(pt,ring){
+  var x=pt[0],y=pt[1],inside=false;
+  for(var i=0,j=ring.length-1;i<ring.length;j=i++){
+    var xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+    if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))inside=!inside;
+  }
+  return inside;
+}
+function ptInFeat(feat,pt){
+  var g=feat.geometry;if(!g)return false;
+  var rings=g.type==="Polygon"?[g.coordinates[0]]:g.type==="MultiPolygon"?g.coordinates.map(function(p){return p[0];}):[];
+  return rings.some(function(r){return pip(pt,r);});
+}
+function buildPopup(props){
+  if(!props)return"";
+  var skip=["FID","fid","OBJECTID","Shape_Area","Shape_Leng","shape_area","shape_leng"];
+  var rows="";
+  Object.keys(props).forEach(function(k){
+    if(skip.indexOf(k)>=0||props[k]===null||props[k]==="")return;
+    rows+="<tr><td>"+k+"</td><td>"+props[k]+"</td></tr>";
+  });
+  return rows?"<table>"+rows+"</table>":"(Sin atributos)";
+}
+
+// ── LAYER CREATION ─────────────────────────────────────────
+function mkStyle(cfg){return{color:cfg.c||"#555",fillColor:cfg.fc||cfg.c||"#999",fillOpacity:cfg.fo!==undefined?cfg.fo:0,weight:cfg.w||1,opacity:.9};}
+function mkCircle(cfg){return function(f,ll){return L.circleMarker(ll,{radius:5,color:"#fff",weight:1,fillColor:cfg.pc||"#1a6b3a",fillOpacity:.85});}}
+function mkDivMk(cfg){return function(f,ll){
+  var ic=L.divIcon({html:"<div style=\"width:10px;height:10px;background:"+cfg.pc+";border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.4)\"></div>",className:"",iconSize:[10,10],iconAnchor:[5,5]});
+  return L.marker(ll,{icon:ic});
+};}
+function mkLayer(cfg,data){
+  var opts={onEachFeature:function(f,l){l.bindPopup("<b>"+cfg.n+"</b><br>"+buildPopup(f.properties),{maxWidth:280});}};
+  if(cfg.t==="poly"||cfg.t==="line"){opts.style=function(){return mkStyle(cfg);};}
+  else if(cfg.t==="ptc"){opts.pointToLayer=mkCircle(cfg);}
+  else if(cfg.t==="ptm"){
+    var cl=L.markerClusterGroup({maxClusterRadius:30});
+    cl.addLayer(L.geoJSON(data,{pointToLayer:mkDivMk(cfg),onEachFeature:function(f,l){l.bindPopup("<b>Punto de Muestreo</b><br>"+buildPopup(f.properties),{maxWidth:280})}}));
+    return cl;
+  }
+  return L.geoJSON(data,opts);
+}
+
+// ── DATA LOADING ───────────────────────────────────────────
+function showLd(msg){el("ldo").classList.add("vis");el("ldt").textContent=msg||"Cargando...";}
+function hideLd(){el("ldo").classList.remove("vis");}
+function setLdP(d,t){el("ldb").style.width=(t>0?d/t*100:0)+"%";}
+
+function loadLayer(cfg,addToMap){
+  if(S.data[cfg.id]){
+    if(addToMap&&!S.layers[cfg.id]){
+      var l=mkLayer(cfg,S.data[cfg.id]);S.layers[cfg.id]=l;
+      if(cfg.on)l.addTo(S.mainMap);
+    }
+    return Promise.resolve(S.data[cfg.id]);
+  }
+  return fetch(cfg.f).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(data){
+    S.data[cfg.id]=data;
+    var l=mkLayer(cfg,data);S.layers[cfg.id]=l;
+    if(cfg.on)l.addTo(S.mainMap);
+    if(cfg.id.startsWith("area_")){
+      var code=cfg.id.replace("area_","");
+      try{S.bounds[code]=L.geoJSON(data).getBounds();}catch(e){}
+    }
+    // Auto-refresh dashboard when SE consolidado loads
+    var sm=cfg.id.match(/^se_([a-z]+)_c$/);
+    if(sm&&sm[1]===S.area)setTimeout(function(){renderDash(S.area);},100);
+    return data;
+  })
+  .catch(function(e){console.warn("Failed:",cfg.f,e.message);return null;});
+}
+
+function loadEssentials(){
+  showLd("Cargando áreas de estudio...");
+  var ids=["area_ca","area_cb","area_lr","area_me","puntos","cb_dr1","cb_vi","cb_bo","cb_dr2","cb_lg"];
+  var done=0,tot=ids.length;
+  return Promise.all(ids.map(function(id){
+    var cfg=S.lmap[id];if(!cfg)return Promise.resolve();
+    return loadLayer(cfg,true).then(function(){setLdP(++done,tot);});
+  })).then(function(){
+    hideLd();
+    var all=null;
+    ["ca","cb","lr","me"].forEach(function(c){
+      if(S.bounds[c]){all=all?all.extend(S.bounds[c]):S.bounds[c];}
+    });
+    if(all&&all.isValid())S.mainMap.fitBounds(all,{padding:[30,30]});
+    // Background load on-layers
+    var bg=Object.keys(S.lmap).filter(function(id){return!S.data[id]&&S.lmap[id].on;});
+    bg.forEach(function(id,i){setTimeout(function(){loadLayer(S.lmap[id],true);},i*250+500);});
+  });
+}
+
+// ── LAYER PANEL ────────────────────────────────────────────
+function buildLP(){
+  var c=el("lpc");c.innerHTML="";
+  LG.forEach(function(grp){
+    var gd=document.createElement("div");
+    var gt=document.createElement("div");
+    gt.className="lpgt";
+    gt.innerHTML="<span>"+grp.g+"</span><span>"+(grp.open?"▲":"▼")+"</span>";
+    var gi=document.createElement("div");
+    gi.style.display=grp.open?"":"none";
+    gt.onclick=function(){var op=gi.style.display!=="none";gi.style.display=op?"":"block";gt.querySelector("span:last-child").textContent=op?"▼":"▲";};
+    grp.layers.forEach(function(cfg){
+      var item=document.createElement("div");item.className="lpit";
+      var cb=document.createElement("input");cb.type="checkbox";cb.checked=cfg.on;
+      cb.setAttribute("data-lid",cfg.id);
+      cb.onchange=function(){toggleL(cfg.id,this.checked);};
+      var sw=document.createElement("div");sw.className="sw";
+      if(cfg.t==="poly"){sw.style.background=cfg.fc||cfg.c||"#999";sw.style.borderColor=cfg.c||"#555";}
+      else if(cfg.t==="line"){sw.style.background=cfg.c||"#555";sw.style.height="4px";sw.style.marginTop="4px";}
+      else{sw.style.background=cfg.pc||"#1a6b3a";sw.style.borderRadius="50%";}
+      var lb=document.createElement("span");lb.className="ln";lb.textContent=cfg.n;
+      item.appendChild(cb);item.appendChild(sw);item.appendChild(lb);
+      gi.appendChild(item);
+    });
+    gd.appendChild(gt);gd.appendChild(gi);c.appendChild(gd);
+  });
+}
+function toggleL(id,vis){
+  var cfg=S.lmap[id];if(!cfg)return;
+  cfg.on=vis;
+  if(!S.data[id]&&vis){loadLayer(cfg,true);return;}
+  var l=S.layers[id];if(!l)return;
+  if(vis)l.addTo(S.mainMap);else S.mainMap.removeLayer(l);
+}
+
+// ── LOCALIZATION MAP ───────────────────────────────────────
+function initLocMap(){
+  S.locMap=L.map("locmap",{attributionControl:false,zoomControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,keyboard:false,center:[4,-74],zoom:4});
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:6}).addTo(S.locMap);
+  L.geoJSON(COLOMBIA,{style:{color:"#1a6b3a",weight:1.5,fillColor:"#c8e6c9",fillOpacity:.3}}).addTo(S.locMap);
+  S.locLG=L.layerGroup().addTo(S.locMap);
+}
+function updateLocMap(code){
+  if(!S.locMap)return;S.locLG.clearLayers();
+  var codes=code&&code!=="general"?[code]:["ca","cb","lr","me"];
+  codes.forEach(function(c){
+    if(S.bounds[c])L.rectangle(S.bounds[c],{color:"#e74c3c",weight:2,fillColor:"#e74c3c",fillOpacity:.4}).addTo(S.locLG);
+  });
+}
+
+// ── AREA SELECTION ─────────────────────────────────────────
+function selectArea(code){
+  S.area=code;
+  document.querySelectorAll(".abtn").forEach(function(b){b.classList.remove("active");});
+  var btn=el("btn-"+code);if(btn)btn.classList.add("active");
+  var nm=code==="general"?"Vista General":AC[code].name;
+  var col=AC[code]?AC[code].color:"#1a6b3a";
+  el("dan").textContent=nm;el("ddot").style.background=col;
+  if(code==="general"){
+    var all=null;["ca","cb","lr","me"].forEach(function(c){if(S.bounds[c]){all=all?all.extend(S.bounds[c]):S.bounds[c];}});
+    if(all&&all.isValid())S.mainMap.fitBounds(all,{padding:[40,40]});
+    // Reset area styles
+    ["ca","cb","lr","me"].forEach(function(c){var l=S.layers["area_"+c];var cfg=S.lmap["area_"+c];if(l&&cfg)l.setStyle({color:cfg.c,weight:2.5,fillOpacity:.15,opacity:.9});});
+    updateLocMap("general");renderGeneralDash();
+  } else {
+    if(S.bounds[code]&&S.bounds[code].isValid())S.mainMap.fitBounds(S.bounds[code],{padding:[60,60]});
+    // Highlight selected, dim others
+    ["ca","cb","lr","me"].forEach(function(c){
+      var l=S.layers["area_"+c];var cfg=S.lmap["area_"+c];if(!l||!cfg)return;
+      if(c===code)l.setStyle({color:AC[c].color,weight:3.5,fillOpacity:.25,opacity:1});
+      else l.setStyle({color:cfg.c,weight:1,fillOpacity:.04,opacity:.3});
+    });
+    updateLocMap(code);
+    // Preload SE for this area
+    LG.forEach(function(grp){if(grp.area===code)grp.layers.forEach(function(cfg){if(!S.data[cfg.id])loadLayer(cfg,false);});});
+    renderDash(code);
+  }
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────
+function renderGeneralDash(){
+  var h="<div class=\"sc\">";
+  h+="<div class=\"sct\">📍 Áreas de Estudio</div>";
+  h+="<table class=\"mt\">";
+  ["ca","cb","lr","me"].forEach(function(c){
+    var d=S.data["area_"+c];var ha="—";
+    if(d&&d.features&&d.features.length){var a=featArea(d.features[0]);if(a)ha=fmtHa(a);}
+    h+="<tr><td style=\"width:14px;padding-right:6px\"><span style=\"display:inline-block;width:10px;height:10px;border-radius:50%;background:"+AC[c].color+"\"></span></td><td>"+AC[c].name+"</td><td>"+ha+"</td></tr>";
+  });
+  h+="</table></div>";
+  var pd=S.data["puntos"];
+  if(pd&&pd.features)h+="<div class=\"sc\"><div class=\"sct\">📌 Puntos de muestreo</div><div class=\"sbig\">"+pd.features.length+"<span class=\"su\">puntos</span></div></div>";
+  h+=dlButtons("general");
+  el("dc").innerHTML=h;
+}
+
+function renderDash(code){
+  el("dc").innerHTML="<div style=\"padding:20px;text-align:center;color:var(--mu);font-size:12px\">Calculando...</div>";
+  setTimeout(function(){
+    var h="",ac=AC[code].color;
+    // 1) Área total
+    var ad=S.data["area_"+code];var aM2=0;
+    if(ad&&ad.features&&ad.features.length){aM2=featArea(ad.features[0]);if(!aM2){var g=ad.features[0].geometry;if(g&&g.type==="Polygon")aM2=polyArea(g.coordinates[0]);else if(g&&g.type==="MultiPolygon")g.coordinates.forEach(function(r){aM2+=polyArea(r[0]);});}}
+    h+="<div class=\"sc\" style=\"border-left:3px solid "+ac+"\">";
+    h+="<div class=\"sct\">📐 Extensión del área</div>";
+    h+="<div class=\"sbig\">"+Math.round(aM2/10000).toLocaleString("es-CO")+"<span class=\"su\">ha</span></div>";
+    h+="<div class=\"ss\">"+(aM2/1e6).toFixed(2)+" km²</div></div>";
+    // 2) Hidrografía
+    var rLen=0;var dd=S.data["cb_dr1"];if(dd)dd.features.forEach(function(f){rLen+=featLen(f);});
+    var vLen=0;var dv=S.data["cb_vi"];if(dv)dv.features.forEach(function(f){vLen+=featLen(f);});
+    h+="<div class=\"sc\"><div class=\"sct\">💧 Hidrografía y Vías</div><table class=\"mt\">";
+    h+="<tr><td>Drenaje sencillo</td><td>"+fmtKm(rLen)+"</td></tr>";
+    h+="<tr><td>Vías</td><td>"+fmtKm(vLen)+"</td></tr>";
+    h+="</table><div class=\"ss\">Red hidrográfica y vial del área</div></div>";
+    // 3) Puntos muestreo
+    var ptd=S.data["puntos"];var ptA=[];
+    if(ptd&&ptd.features&&ad&&ad.features&&ad.features.length){
+      var af=ad.features[0];
+      ptd.features.forEach(function(f){if(f.geometry&&f.geometry.coordinates&&ptInFeat(af,f.geometry.coordinates))ptA.push(f);});
+    }
+    h+="<div class=\"sc\"><div class=\"sct\">📌 Puntos de muestreo</div>";
+    h+="<div class=\"sbig\">"+ptA.length+"<span class=\"su\">puntos</span></div>";
+    if(ptA.length>0){
+      h+="<div class=\"plist\">";
+      ptA.slice(0,6).forEach(function(f,i){
+        var p=f.properties||{};var nm=p.Nombre||p.nombre||p.Name||p.ID||("Punto "+(i+1));
+        h+="<div class=\"pit\"><div class=\"pdot\" style=\"background:"+ac+"\"></div>"+nm+"</div>";
+      });
+      if(ptA.length>6)h+="<div class=\"pit\" style=\"color:var(--mu)\">...y "+(ptA.length-6)+" más</div>";
+      h+="</div>";
+    }
+    h+="</div>";
+    // 4) SE
+    var ck="se_"+code+"_c";var cd=S.data[ck];
+    var seT={"Soporte":0,"Provisión":0,"Cultural":0};var seTot=0,seCnt=0;
+    if(cd&&cd.features){
+      cd.features.forEach(function(f){
+        var p=f.properties||{};
+        var tp=p["Tipo_de_se"]||p["Tipo de SE"]||"";
+        if(tp.match(/soporte/i))tp="Soporte";
+        else if(tp.match(/provis/i))tp="Provisión";
+        else if(tp.match(/cultural/i))tp="Cultural";
+        var av=featArea(f);seTot+=av;seCnt++;
+        if(tp in seT)seT[tp]+=av;
+      });
+    }
+    h+="<div class=\"sc\"><div class=\"sct\">🌱 Servicios Ecosistémicos</div>";
+    if(seCnt>0){
+      h+="<div class=\"sbig\">"+Math.round(seTot/10000).toLocaleString("es-CO")+"<span class=\"su\">ha</span></div>";
+      h+="<div class=\"ss\">"+seCnt+" polígonos registrados</div><div style=\"margin-top:6px\">";
+      var seC={"Soporte":"#2e86c1","Provisión":"#1e8449","Cultural":"#8e44ad"};
+      Object.keys(seT).forEach(function(tp){
+        var v=seT[tp],pct=seTot>0?v/seTot*100:0;
+        h+="<div class=\"sbb-r\"><div class=\"sbb-l\">"+tp+"</div><div class=\"sbb-o\"><div class=\"sbb-i\" style=\"width:"+pct.toFixed(0)+"%;background:"+(seC[tp]||"#888")+"\"\></div></div><div class=\"sbb-v\">"+Math.round(v/10000)+" ha</div></div>";
+      });
+      h+="</div>";
+    } else {
+      h+="<div class=\"ss\">Activa el SE Consolidado en capas para calcular</div>";
+    }
+    h+="</div>";
+    // 5) Minería
+    var mpd=S.data["min_po"];var mCnt=0,mArea=0;
+    if(mpd&&mpd.features&&ad&&ad.features&&ad.features.length){
+      var af2=ad.features[0];
+      mpd.features.forEach(function(f){var ctr=centroid(f);if(ctr&&ptInFeat(af2,ctr)){mCnt++;mArea+=featArea(f);}});
+    }
+    h+="<div class=\"sc\"><div class=\"sct\">⛏️ Minería Ilegal</div><table class=\"mt\">";
+    h+="<tr><td>Polígonos en área</td><td>"+mCnt+"</td></tr>";
+    h+="<tr><td>Área afectada</td><td>"+fmtHa(mArea)+"</td></tr>";
+    h+="</table></div>";
+    // 6) ANP
+    var anpIDs={"anp_na":"Parques Nac.","anp_de":"Dep.","anp_bp":"Bosque Prot.","anp_rf":"Reserva"};
+    var anpT=0;var anpR=[];
+    if(ad&&ad.features&&ad.features.length){var af3=ad.features[0];
+      Object.keys(anpIDs).forEach(function(aid){var d2=S.data[aid];if(!d2)return;
+        var cnt=0;d2.features.forEach(function(f){var ctr=centroid(f);if(ctr&&ptInFeat(af3,ctr))cnt++;});
+        if(cnt>0){anpT+=cnt;anpR.push(anpIDs[aid]+": "+cnt);}
+      });
+    }
+    h+="<div class=\"sc\"><div class=\"sct\">🛡️ Áreas Protegidas</div>";
+    if(anpT>0){h+="<div class=\"sbig\">"+anpT+"<span class=\"su\">registros</span></div><div class=\"ss\">"+anpR.join(" · ")+"</div>";}
+    else{h+="<div class=\"ss\">Activa capas ANP para calcular intersecciones</div>";}
+    h+="</div>";
+    // 7) Descargas
+    h+=dlButtons(code);
+    el("dc").innerHTML=h;
+  },300);
+}
+
+// ── DOWNLOADS ──────────────────────────────────────────────
+function dlButtons(code){
+  var aName=code==="general"?"todas_las_areas":AC[code]?AC[code].name.toLowerCase().replace(/ /g,"_"):code;
+  return "<div class=\"sc\"><div class=\"sct\">⬇️ Descargar Datos</div>"+
+    "<div style=\"display:flex;flex-direction:column;gap:6px\">"+
+    "<button onclick=\"dlKMZ('"+code+"')\" style=\"padding:8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);cursor:pointer;font-size:12px;font-weight:600;color:var(--dk);display:flex;align-items:center;justify-content:center;gap:6px\">📐 Descargar KMZ ("+aName+")</button>"+
+    "<button onclick=\"dlGeoZip('"+code+"')\" style=\"padding:8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);cursor:pointer;font-size:12px;font-weight:600;color:var(--dk);display:flex;align-items:center;justify-content:center;gap:6px\">📦 Descargar GeoJSON ZIP</button>"+"<a href=\"Mercurio_2026_datos_SIG.gpkg\" download style=\"padding:8px;border:1px solid #1a6b3a;border-radius:6px;background:#f0f5f0;cursor:pointer;font-size:12px;font-weight:600;color:#0d3b20;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none\">🗂️ Descargar GeoPackage (.gpkg)</a>"+"<a href=\"Mercurio_2026_datos_SIG.kmz\" download style=\"display:none\"\></a>"+
+    "<div style=\"font-size:10px;color:var(--mu);margin-top:2px\">GDB original disponible en la carpeta de proyecto</div>"+
+    "</div></div>";
+}
+
+// Convert GeoJSON feature to KML geometry string
+function geomToKML(g){
+  if(!g)return"";
+  function coords2D(cs){return cs.map(function(c){return c[0]+","+c[1]+(c[2]?","+c[2]:"");}).join(" ");}
+  if(g.type==="Point")return"<Point><coordinates>"+g.coordinates[0]+","+g.coordinates[1]+"</coordinates></Point>";
+  if(g.type==="LineString")return"<LineString><coordinates>"+coords2D(g.coordinates)+"</coordinates></LineString>";
+  if(g.type==="MultiLineString"){return"<MultiGeometry>"+g.coordinates.map(function(l){return"<LineString><coordinates>"+coords2D(l)+"</coordinates></LineString>";}).join("")+"</MultiGeometry>";}
+  if(g.type==="Polygon"){return"<Polygon><outerBoundaryIs><LinearRing><coordinates>"+coords2D(g.coordinates[0])+"</coordinates></LinearRing></outerBoundaryIs>"+(g.coordinates.slice(1).map(function(r){return"<innerBoundaryIs><LinearRing><coordinates>"+coords2D(r)+"</coordinates></LinearRing></innerBoundaryIs>";}).join(""))+"</Polygon>";}
+  if(g.type==="MultiPolygon"){return"<MultiGeometry>"+g.coordinates.map(function(p){return"<Polygon><outerBoundaryIs><LinearRing><coordinates>"+coords2D(p[0])+"</coordinates></LinearRing></outerBoundaryIs></Polygon>";}).join("")+"</MultiGeometry>";}
+  return"";
+}
+
+function geoJSONtoKML(name,data){
+  if(!data||!data.features)return"";
+  var pm=data.features.map(function(f,i){
+    var p=f.properties||{};
+    var nm=p.Nombre||p.nombre||p.Name||p.name||(name+" "+(i+1));
+    var desc=Object.keys(p).filter(function(k){return p[k]!==null&&p[k]!=="";}).map(function(k){return k+": "+p[k];}).join("\n");
+    return"<Placemark><name><![CDATA["+nm+"]]></name><description><![CDATA["+desc+"]]></description>"+geomToKML(f.geometry)+"</Placemark>";
+  }).join("");
+  return"<Folder><name>"+name+"</name>"+pm+"</Folder>";
+}
+
+function dlKMZ(code){
+  if(!window.JSZip){alert("JSZip no disponible");return;}
+  showLd("Generando KMZ...");
+  var layers=collectLayers(code);
+  var kmlFolders=layers.map(function(x){return geoJSONtoKML(x.name,x.data);}).join("");
+  var kml='<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Proyecto Mercurio 2026 - '+(code==="general"?"Todas las Áreas":AC[code].name)+'</name>'+kmlFolders+"</Document></kml>";
+  var zip=new JSZip();
+  zip.file("doc.kml",kml);
+  zip.generateAsync({type:"blob"}).then(function(blob){
+    hideLd();
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="Mercurio_2026_"+(code==="general"?"general":AC[code].name.replace(/ /g,"_"))+".kmz";
+    a.click();
+  });
+}
+
+function dlGeoZip(code){
+  if(!window.JSZip){alert("JSZip no disponible");return;}
+  showLd("Generando ZIP...");
+  var layers=collectLayers(code);
+  var zip=new JSZip();
+  var folder=zip.folder("Mercurio_2026_"+(code==="general"?"general":AC[code].name.replace(/ /g,"_")));
+  layers.forEach(function(x){
+    if(x.data)folder.file(x.id+".geojson",JSON.stringify(x.data));
+  });
+  // Add README
+  folder.file("LEEME.txt","Datos SIG - Proyecto Mercurio 2026\nCorpoamazonia\nCRS: EPSG:4326 (WGS84)\nFecha: "+new Date().toLocaleDateString("es-CO")+"\n\nPara GDB completa en EPSG:9377 contacta al equipo de proyecto.");
+  zip.generateAsync({type:"blob"}).then(function(blob){
+    hideLd();
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="Mercurio_2026_"+(code==="general"?"general":AC[code].name.replace(/ /g,"_"))+"_datos.zip";
+    a.click();
+  });
+}
+
+function collectLayers(code){
+  var result=[];
+  var include=[];
+  if(code==="general"){
+    include=Object.keys(S.lmap).filter(function(id){return S.data[id]&&S.lmap[id].on;});
+  } else {
+    // Area polygon, area SE, shared layers
+    var shareIds=["cb_dr1","cb_dr2","cb_vi","cb_bo","cb_lg","min_po","min_li","min_pt","puntos","anp_na","anp_de","anp_bp","anp_rf"];
+    var areaIds=["area_"+code];
+    LG.forEach(function(grp){if(grp.area===code)grp.layers.forEach(function(l){areaIds.push(l.id);});});
+    if(code==="ca"||code==="cb")areaIds.push("min_cu");
+    if(code==="me")areaIds.push("min_me");
+    include=areaIds.concat(shareIds).filter(function(id){return S.data[id];});
+  }
+  include.forEach(function(id){
+    var cfg=S.lmap[id];if(!cfg||!S.data[id])return;
+    result.push({id:id,name:cfg.n,data:S.data[id]});
+  });
+  return result;
+}
+
+// ── MAP INIT ───────────────────────────────────────────────
+function initMap(){
+  S.mainMap=L.map("map",{center:[0.5,-75.8],zoom:9,zoomControl:true});
+  var osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:20});
+  var sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"© Esri",maxZoom:20});
+  var lbl=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",{attribution:"",maxZoom:20});
+  osm.addTo(S.mainMap);
+  L.control.layers({"OpenStreetMap":osm,"Satélite (Esri)":sat},{"Etiquetas":lbl},{position:"topright",collapsed:false}).addTo(S.mainMap);
+  L.control.scale({metric:true,imperial:false}).addTo(S.mainMap);
+}
+
+// ── MODAL ──────────────────────────────────────────────────
+function closeModal(){el("modal").style.display="none";}
+
+// ── INIT ───────────────────────────────────────────────────
+window.addEventListener("load",function(){
+  initMap();initLocMap();buildLP();
+  loadEssentials().then(function(){renderGeneralDash();updateLocMap("general");});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "se_ca_aprendizaje",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "OBJECTID": 1, "fid_1": 66.0, "Tipo_de_se": "Cultural", "Servicio_e": "Aprendizaje e inspiración", "Descripcie": "Escuela y lugar de encuentro", "Área": 12894.0, "s": 1.0 }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ -76.000747400003249, 1.038021045266397 ], [ -75.999257462073373, 1.038125668177225 ], [ -75.999106546195364, 1.037547895826116 ], [ -76.000698841333801, 1.037264297508281 ], [ -76.000747400003249, 1.038021045266397 ] ] ] ] } }
+]
+}

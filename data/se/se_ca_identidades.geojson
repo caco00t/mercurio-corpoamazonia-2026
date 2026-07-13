@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "se_ca_identidades",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "OBJECTID": 1, "fid_1": 22.0, "Tipo_de_se": "Cultural", "Servicio_e": "Construcción de identidades", "Descripcie": "Iglesia pentecostal", "Área": 850.0, "s": 1.0 }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ -76.007718540325172, 1.05292357074736 ], [ -76.007428000626462, 1.052939723571071 ], [ -76.00740750046252, 1.052701691059975 ], [ -76.007707059656155, 1.052694598632663 ], [ -76.007718540325172, 1.05292357074736 ] ] ] ] } }
+]
+}

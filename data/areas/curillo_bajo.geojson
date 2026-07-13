@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "curillo_bajo",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "OBJECTID": 1, "Name": "Curillo bajo", "FolderPath": "Curillo bajo.kmz", "SymbolID": 0.0, "AltMode": 0, "Base": 0.0, "Clamped": -1, "Extruded": 0, "Snippet": null, "PopupInfo": "Conquistador y Calle San Juan", "Shape_Leng": 0.567965081968, "Shape_Area": 0.020083822292900001 }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ -75.957831872256108, 1.053243555660835, 0.0 ], [ -75.824746541633061, 1.053261374141703, 0.0 ], [ -75.824716605331744, 0.902496412387233, 0.0 ], [ -75.957985760592749, 0.902398040914416, 0.0 ], [ -75.957831872256108, 1.053243555660835, 0.0 ] ] ] ] } }
+]
+}

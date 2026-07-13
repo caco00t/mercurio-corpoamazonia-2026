@@ -1,0 +1,74 @@
+VISOR SIG WEB — PROYECTO MERCURIO 2026
+PROMIGAS S.A. E.S.P.
+===============================================
+
+CÓMO ABRIR EL VISOR
+--------------------
+OPCIÓN 1 (recomendada — funciona sin internet):
+  1. Ejecutar "start_server.bat" con doble clic
+  2. Abrir navegador (Chrome o Firefox)
+  3. Ir a: http://localhost:8080
+  4. Para cerrar el servidor: presionar Ctrl+C en la ventana negra
+
+OPCIÓN 2 (doble clic directo):
+  - Abrir "index.html" directamente (doble clic)
+  - NOTA: En Chrome puede no cargar por restricciones CORS con file://
+  - Funciona mejor en Firefox con configuración predeterminada
+
+OPCIÓN 3 (VS Code):
+  - Instalar extensión "Live Server"
+  - Clic derecho en index.html > "Open with Live Server"
+
+REQUISITOS
+----------
+  - Python 3.x instalado (para start_server.bat)
+  - Navegador: Chrome 90+, Firefox 88+, Edge 90+
+  - Conexión a internet solo para cargar el mapa base (OpenStreetMap/Satélite)
+  - Los datos GeoJSON están EMBEBIDOS en el HTML — no requieren internet
+
+CAPAS INCLUIDAS
+---------------
+Áreas de Estudio:
+  - Curillo Alto, Curillo Bajo, La Rastra, Mecaya, Ventana
+
+Áreas Naturales Protegidas:
+  - ANP Nacional, ANP Departamental, Bosque Protector
+  - Reserva Forestal, Biomas
+
+Minería:
+  - Minería Ilegal (Polígonos y Puntos)
+  - Minería Curillo, Minería Mecaya
+
+Servicios Ecosistémicos:
+  - SE Consolidado: Curillo Alto, Curillo Bajo, La Rastra, Mecaya
+
+Cartografía Base:
+  - Drenaje, Bosque, Vías, Puntos de Muestreo
+
+FUNCIONALIDADES
+---------------
+  - Panel lateral: activar/desactivar capas por grupo
+  - 3 mapas base: OpenStreetMap, Satélite (Esri), Topográfico
+  - Clic en cualquier objeto: muestra sus atributos
+  - Botón ⌂ (esquina superior derecha): zoom a extensión total
+  - Leyenda interactiva (esquina inferior derecha)
+  - Escala gráfica (esquina inferior izquierda)
+  - Panel colapsable con botón ◀ ▶
+
+INFORMACIÓN TÉCNICA
+-------------------
+  CRS de entrega: EPSG:9377 (MAGNA-SIRGAS / Colombia Bogota zone)
+  CRS del visor: EPSG:4326 (WGS84)
+  Datos fuente: Mercurio_2026.gdb (ESRI File Geodatabase)
+  Capas exportadas: 22 Feature Classes
+  Formato visor: GeoJSON embebido en HTML
+
+CRÉDITOS
+--------
+  Software SIG: QGIS 3.x (open source)
+  Visor web: Leaflet 1.9.4 (BSD License)
+  Mapa base: © OpenStreetMap contributors (ODbL)
+  Satélite: © Esri, DigitalGlobe
+  Desarrollado por: Análisis Espacial — PROMIGAS S.A. E.S.P.
+  Proyecto: Mercurio 2026
+
