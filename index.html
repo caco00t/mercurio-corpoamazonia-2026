@@ -148,30 +148,10 @@ var LG = [
     {id:"area_lr",n:"La Rastra",    t:"poly",f:"data/areas/la_rastra.geojson",   c:"#6c3483",fc:"#bb8fce",fo:.15,w:2.5,on:true},
     {id:"area_me",n:"Mecaya",       t:"poly",f:"data/areas/mecaya.geojson",       c:"#b7770d",fc:"#f0b27a",fo:.15,w:2.5,on:true}
   ]},
-  {g:"💧 Hidrografía",open:true,layers:[
-    {id:"cb_dr1",n:"Drenaje sencillo", t:"line",f:"data/cartografia/cb_drenaje_sencillo.geojson",c:"#1a72bb",w:1.5,on:true},
-    {id:"cb_dr2",n:"Drenaje doble",    t:"poly",f:"data/cartografia/cb_drenaje_doble.geojson",   c:"#1a72bb",fc:"#7fb3e8",fo:.5,w:1,on:true},
-    {id:"cb_mv", n:"Madrevieja",       t:"poly",f:"data/cartografia/cb_madrevieja.geojson",       c:"#1554a0",fc:"#7fb3d6",fo:.55,w:1,on:true},
-    {id:"cb_lg", n:"Laguna",           t:"poly",f:"data/cartografia/cb_laguna.geojson",           c:"#1a72bb",fc:"#85c1e9",fo:.6,w:1,on:true},
-    {id:"cb_pt", n:"Pantano",          t:"poly",f:"data/cartografia/cb_pantano.geojson",          c:"#4a6741",fc:"#8ab882",fo:.5,w:1,on:false},
-    {id:"cb_ba", n:"Banco de arena",   t:"poly",f:"data/cartografia/cb_banco_arena.geojson",      c:"#a07830",fc:"#e8c97a",fo:.5,w:1,on:false},
-    {id:"cb_il", n:"Isla",             t:"poly",f:"data/cartografia/cb_isla.geojson",             c:"#2e7d32",fc:"#81c784",fo:.5,w:1,on:false}
-  ]},
-  {g:"🛣️ Vías e Infraestructura",open:true,layers:[
-    {id:"cb_vi",n:"Vías",             t:"line",f:"data/cartografia/cb_via.geojson",            c:"#8b4513",w:1.8,on:true},
-    {id:"cb_pu",n:"Puentes",          t:"ptc", f:"data/cartografia/cb_puente.geojson",         pc:"#8b4513",on:true},
-    {id:"cb_ce",n:"Cercas",           t:"line",f:"data/cartografia/cb_cerca.geojson",          c:"#996633",w:1,on:false},
-    {id:"cb_co",n:"Construcciones",   t:"ptc", f:"data/cartografia/cb_construccion.geojson",   pc:"#888888",on:false},
-    {id:"cb_ad",n:"Administrativo",   t:"ptc", f:"data/cartografia/cb_administrativo.geojson", pc:"#333333",on:false}
-  ]},
-  {g:"🌿 Vegetación",open:false,layers:[
-    {id:"cb_bo",n:"Bosque",          t:"poly",f:"data/cartografia/cb_bosque.geojson",       c:"#1a5c2e",fc:"#52be80",fo:.35,w:.8,on:true},
-    {id:"cb_cn",n:"Curvas de nivel", t:"line",f:"data/cartografia/cb_curva_nivel.geojson",  c:"#a08040",w:.5,on:false}
-  ]},
-  {g:"🏞️ Contexto Putumayo",open:false,layers:[
-    {id:"cbc_dr",n:"Drenaje (región)",  t:"line",f:"data/contexto/cbc_drenaje.geojson", c:"#5dade2",w:.7,on:false},
-    {id:"cbc_vi",n:"Vías (región)",     t:"line",f:"data/contexto/cbc_via.geojson",     c:"#cc8844",w:.7,on:false},
-    {id:"cbc_bo",n:"Bosque (región)",   t:"poly",f:"data/contexto/cbc_bosque.geojson",  c:"#1a5c2e",fc:"#52be80",fo:.2,w:.5,on:false},
+  {g:"🏞️ Contexto Putumayo",open:true,layers:[
+    {id:"cbc_dr",n:"Drenaje (región)",  t:"line",f:"data/contexto/cbc_drenaje.geojson", c:"#5dade2",w:.7,on:true},
+    {id:"cbc_vi",n:"Vías (región)",     t:"line",f:"data/contexto/cbc_via.geojson",     c:"#cc8844",w:.7,on:true},
+    {id:"cbc_bo",n:"Bosque (región)",   t:"poly",f:"data/contexto/cbc_bosque.geojson",  c:"#1a5c2e",fc:"#52be80",fo:.2,w:.5,on:true},
     {id:"cbc_ad",n:"Centros poblados",  t:"ptc", f:"data/contexto/cbc_admin.geojson",   pc:"#444",on:false}
   ]},
   {g:"🛡️ Áreas Protegidas",open:false,layers:[
@@ -182,11 +162,11 @@ var LG = [
     {id:"biomas",n:"Biomas",              t:"poly",f:"data/anp/biomas.geojson",                c:"#5a8a3a",fc:"#90cc60",fo:.12,w:1,on:false}
   ]},
   {g:"⛏️ Minería",open:true,layers:[
-    {id:"min_po",n:"Minería ilegal (polígono)", t:"poly",f:"data/mineria/mineria_ilegal_poligono.geojson",c:"#7b241c",fc:"#e74c3c",fo:.45,w:.8,on:true},
-    {id:"min_li",n:"Minería ilegal (línea)",    t:"line",f:"data/mineria/mineria_ilegal_linea.geojson",  c:"#c0392b",w:2,on:true},
-    {id:"min_pt",n:"Minería ilegal (punto)",    t:"ptc", f:"data/mineria/mineria_ilegal_punto.geojson",  pc:"#e74c3c",on:true},
-    {id:"min_cu",n:"Minería Curillo",           t:"poly",f:"data/mineria/mineria_curillo.geojson",       c:"#922b21",fc:"#f1948a",fo:.55,w:1,on:false},
-    {id:"min_me",n:"Minería Mecaya",            t:"poly",f:"data/mineria/mineria_mecaya.geojson",        c:"#922b21",fc:"#f1948a",fo:.55,w:1,on:false}
+    {id:"min_po",n:"Minería ilegal (polígono)", t:"poly",f:"data/mineria/mineria_ilegal_poligono.geojson",c:"#7b241c",fc:"#e74c3c",fo:.45,w:.8,on:false},
+    {id:"min_li",n:"Minería ilegal (línea)",    t:"line",f:"data/mineria/mineria_ilegal_linea.geojson",  c:"#c0392b",w:2,on:false},
+    {id:"min_pt",n:"Minería ilegal (punto)",    t:"ptc", f:"data/mineria/mineria_ilegal_punto.geojson",  pc:"#e74c3c",on:false},
+    {id:"min_cu",n:"Minería Curillo",           t:"poly",f:"data/mineria/mineria_curillo.geojson",       c:"#922b21",fc:"#f1948a",fo:.55,w:1,on:true},
+    {id:"min_me",n:"Minería Mecaya",            t:"poly",f:"data/mineria/mineria_mecaya.geojson",        c:"#922b21",fc:"#f1948a",fo:.55,w:1,on:true}
   ]},
   {g:"🌱 SE · Curillo Alto",open:false,area:"ca",layers:[
     {id:"se_ca_c",n:"Consolidado CA", t:"poly",f:"data/se/se_ca_consolidado.geojson", c:"#7d6608",fc:"#f9e79f",fo:.5,w:.8,on:false,area:"ca"},
@@ -319,9 +299,10 @@ function mkDivMk(cfg){return function(f,ll){
   var ic=L.divIcon({html:"<div style=\"width:10px;height:10px;background:"+cfg.pc+";border:2px solid white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.4)\"></div>",className:"",iconSize:[10,10],iconAnchor:[5,5]});
   return L.marker(ll,{icon:ic});
 };}
+function seStyle(cfg,feat){var s=mkStyle(cfg);if(cfg.id&&cfg.id.startsWith("se_")){var p=(feat&&feat.properties)||{};var tp=p["Tipo_de_se"]||p["Tipo de SE"]||"";if(tp.match(/soporte/i)){s.fillColor="#aed6f1";s.color="#2e86c1";s.fillOpacity=.65;}else if(tp.match(/provis/i)){s.fillColor="#a9dfbf";s.color="#1e8449";s.fillOpacity=.65;}else if(tp.match(/cultural/i)){s.fillColor="#d7bde2";s.color="#8e44ad";s.fillOpacity=.65;}}return s;}
 function mkLayer(cfg,data){
   var opts={onEachFeature:function(f,l){l.bindPopup("<b>"+cfg.n+"</b><br>"+buildPopup(f.properties),{maxWidth:280});}};
-  if(cfg.t==="poly"||cfg.t==="line"){opts.style=function(){return mkStyle(cfg);};}
+  if(cfg.t==="poly"||cfg.t==="line"){opts.style=function(feature){return seStyle(cfg,feature);};}
   else if(cfg.t==="ptc"){opts.pointToLayer=mkCircle(cfg);}
   else if(cfg.t==="ptm"){
     var cl=L.markerClusterGroup({maxClusterRadius:30});
@@ -446,7 +427,7 @@ function selectArea(code){
     ["ca","cb","lr","me"].forEach(function(c){var l=S.layers["area_"+c];var cfg=S.lmap["area_"+c];if(l&&cfg)l.setStyle({color:cfg.c,weight:2.5,fillOpacity:.15,opacity:.9});});
     updateLocMap("general");renderGeneralDash();
   } else {
-    if(S.bounds[code]&&S.bounds[code].isValid())S.mainMap.fitBounds(S.bounds[code],{padding:[60,60]});
+    if(S.bounds[code]&&S.bounds[code].isValid())S.mainMap.fitBounds(S.bounds[code],{padding:[10,10]});
     // Highlight selected, dim others
     ["ca","cb","lr","me"].forEach(function(c){
       var l=S.layers["area_"+c];var cfg=S.lmap["area_"+c];if(!l||!cfg)return;
@@ -454,6 +435,16 @@ function selectArea(code){
       else l.setStyle({color:cfg.c,weight:1,fillOpacity:.04,opacity:.3});
     });
     updateLocMap(code);
+    // Activar minería del área y desactivar otras
+    var minMap={"ca":"min_cu","cb":"min_cu","lr":null,"me":"min_me"};
+    ["min_cu","min_me"].forEach(function(id){
+      var cfg=S.lmap[id];if(!cfg)return;
+      var show=(minMap[code]===id);
+      cfg.on=show;
+      if(S.layers[id]){if(show)S.layers[id].addTo(S.mainMap);else S.mainMap.removeLayer(S.layers[id]);}
+      else if(show){loadLayer(cfg,true);}
+      var cb=document.querySelector('input[data-lid="'+id+'"]');if(cb)cb.checked=show;
+    });
     // Preload SE for this area
     LG.forEach(function(grp){if(grp.area===code)grp.layers.forEach(function(cfg){if(!S.data[cfg.id])loadLayer(cfg,false);});});
     renderDash(code);
@@ -643,22 +634,21 @@ function dlGeoZip(code){
 
 function collectLayers(code){
   var result=[];
-  var include=[];
   if(code==="general"){
-    include=Object.keys(S.lmap).filter(function(id){return S.data[id]&&S.lmap[id].on;});
+    Object.keys(S.lmap).filter(function(id){return S.data[id]&&S.lmap[id].on;}).forEach(function(id){var cfg=S.lmap[id];result.push({id:id,name:cfg.n,data:S.data[id]});});
   } else {
-    // Area polygon, area SE, shared layers
-    var shareIds=["cb_dr1","cb_dr2","cb_vi","cb_bo","cb_lg","min_po","min_li","min_pt","puntos","anp_na","anp_de","anp_bp","anp_rf"];
-    var areaIds=["area_"+code];
-    LG.forEach(function(grp){if(grp.area===code)grp.layers.forEach(function(l){areaIds.push(l.id);});});
-    if(code==="ca"||code==="cb")areaIds.push("min_cu");
-    if(code==="me")areaIds.push("min_me");
-    include=areaIds.concat(shareIds).filter(function(id){return S.data[id];});
+    var ids=["area_"+code];
+    LG.forEach(function(grp){if(grp.area===code)grp.layers.forEach(function(l){if(S.data[l.id])ids.push(l.id);});});
+    if(code==="ca"||code==="cb")ids.push("min_cu");
+    if(code==="me")ids.push("min_me");
+    ["cbc_dr","cbc_vi","cbc_bo"].forEach(function(id){if(S.data[id])ids.push(id);});
+    ["anp_na","anp_de","anp_bp","anp_rf"].forEach(function(id){if(S.data[id]&&S.lmap[id].on)ids.push(id);});
+    if(S.data["puntos"])ids.push("puntos");
+    ids.filter(function(v,i){return ids.indexOf(v)===i;}).forEach(function(id){
+      var cfg=S.lmap[id];if(!cfg||!S.data[id])return;
+      result.push({id:id,name:cfg.n,data:S.data[id]});
+    });
   }
-  include.forEach(function(id){
-    var cfg=S.lmap[id];if(!cfg||!S.data[id])return;
-    result.push({id:id,name:cfg.n,data:S.data[id]});
-  });
   return result;
 }
 
